@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 800px;
+      height: 480px;
+      font-family: "Arial Black", Arial, sans-serif;
+      background: white;
+      color: black;
+      overflow: hidden;
+    }
+
+    /* ── Header bar ───────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 10px 16px 6px;
+      border-bottom: 3px solid black;
+    }
+    .header-title {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+    .header-date {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* ── Body layout ─────────────────────────────────────────────── */
+    .body {
+      display: flex;
+      height: calc(480px - 49px); /* subtract header */
+    }
+
+    /* ── Source column ───────────────────────────────────────────── */
+    .source-col {
+      flex: 1;
+      border-right: 2px solid black;
+      padding: 8px 10px;
+      overflow: hidden;
+    }
+    .source-col:last-child {
+      border-right: none;
+    }
+
+    .source-label {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1.5px solid black;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+    }
+
+    /* ── Event item ──────────────────────────────────────────────── */
+    .event {
+      margin-bottom: 7px;
+      line-height: 1.25;
+    }
+    .event-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .event-meta {
+      font-size: 11px;
+      font-weight: 400;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .event-time {
+      font-weight: 700;
+    }
+
+    /* ── Empty state ─────────────────────────────────────────────── */
+    .no-events {
+      font-size: 11px;
+      font-style: italic;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    .footer {
+      position: absolute;
+      bottom: 4px;
+      right: 10px;
+      font-size: 9px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span class="header-title">Portland Today</span>
+    <span class="header-date">{{ date_label }}</span>
+  </div>
+
+  <div class="body">
+    {% for source in sources %}
+    <div class="source-col">
+      <div class="source-label">{{ source.label }}</div>
+
+      {% if source.events %}
+        {% for ev in source.events %}
+        <div class="event">
+          <div class="event-title">{{ ev.title }}</div>
+          {% if ev.time or ev.location %}
+          <div class="event-meta">
+            {% if ev.time %}<span class="event-time">{{ ev.time }}</span>{% endif %}
+            {% if ev.time and ev.location %} · {% endif %}
+            {% if ev.location %}{{ ev.location }}{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="no-events">No events found</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="footer">Updated {{ updated_at }}</div>
+
+</body>
+</html>
