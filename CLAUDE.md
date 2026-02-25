@@ -66,5 +66,5 @@ The display automatically adds a new column per source — keep the total number
 
 | Variable | Required | Description |
 |---|---|---|
-| `TRMNL_PLUGIN_UUID` | Yes (for upload) | Found in TRMNL dashboard URL |
+| `TRMNL_WEBHOOK_URL` | Yes (for upload) | Full URL from TRMNL **Webhook Image** plugin settings |
 | `OVERRIDE_DATE` | No | Force a specific date (YYYY-MM-DD) |

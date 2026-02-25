@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      /* Prevent subpixel/colour anti-aliasing — grayscale is safest for 1-bit */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
     body {
       width: 800px;
       height: 480px;
-      font-family: "Arial Black", Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       background: white;
       color: black;
       overflow: hidden;
@@ -23,20 +30,20 @@
       border-bottom: 3px solid black;
     }
     .header-title {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 900;
       letter-spacing: -0.5px;
       text-transform: uppercase;
     }
     .header-date {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
     }
 
     /* ── Body layout ─────────────────────────────────────────────── */
     .body {
       display: flex;
-      height: calc(480px - 49px); /* subtract header */
+      height: calc(480px - 51px);
     }
 
     /* ── Source column ───────────────────────────────────────────── */
@@ -51,22 +58,22 @@
     }
 
     .source-label {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 1px;
       border-bottom: 1.5px solid black;
-      padding-bottom: 3px;
-      margin-bottom: 6px;
+      padding-bottom: 4px;
+      margin-bottom: 7px;
     }
 
     /* ── Event item ──────────────────────────────────────────────── */
     .event {
-      margin-bottom: 7px;
-      line-height: 1.25;
+      margin-bottom: 9px;
+      line-height: 1.2;
     }
     .event-title {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 700;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -74,9 +81,9 @@
       overflow: hidden;
     }
     .event-meta {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 400;
-      margin-top: 1px;
+      margin-top: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -87,19 +94,18 @@
 
     /* ── Empty state ─────────────────────────────────────────────── */
     .no-events {
-      font-size: 11px;
-      font-style: italic;
-      color: #555;
+      font-size: 14px;
+      font-weight: 400;
       margin-top: 4px;
     }
 
     /* ── Footer ─────────────────────────────────────────────────── */
     .footer {
       position: absolute;
-      bottom: 4px;
+      bottom: 5px;
       right: 10px;
-      font-size: 9px;
-      color: #888;
+      font-size: 12px;
+      font-weight: 400;
     }
   </style>
 </head>
@@ -129,7 +135,7 @@
         </div>
         {% endfor %}
       {% else %}
-        <div class="no-events">No events found</div>
+        <div class="no-events">No events today</div>
       {% endif %}
     </div>
     {% endfor %}

@@ -1,4 +1,4 @@
-"""Upload a PNG image to TRMNL via the plugin image API."""
+"""Upload a PNG image to TRMNL via the Webhook Image plugin API."""
 from __future__ import annotations
 
 import os
@@ -6,23 +6,20 @@ from pathlib import Path
 
 import requests
 
-TRMNL_API_BASE = "https://usetrmnl.com/api/plugin_settings"
 
-
-def upload(image_path: Path, plugin_uuid: str | None = None) -> dict:
+def upload(image_path: Path, webhook_url: str | None = None) -> dict:
     """
     Upload image_path to TRMNL.
 
-    plugin_uuid defaults to the TRMNL_PLUGIN_UUID environment variable.
+    webhook_url is the full URL from the Webhook Image plugin settings page.
+    Defaults to the TRMNL_WEBHOOK_URL environment variable.
     Returns the parsed JSON response on success, raises on failure.
     """
-    uuid = plugin_uuid or os.environ.get("TRMNL_PLUGIN_UUID")
-    if not uuid:
+    url = webhook_url or os.environ.get("TRMNL_WEBHOOK_URL")
+    if not url:
         raise ValueError(
-            "TRMNL plugin UUID required. Set TRMNL_PLUGIN_UUID env var or pass plugin_uuid."
+            "TRMNL webhook URL required. Set TRMNL_WEBHOOK_URL env var or pass webhook_url."
         )
-
-    url = f"{TRMNL_API_BASE}/{uuid}/image"
 
     with open(image_path, "rb") as f:
         resp = requests.post(

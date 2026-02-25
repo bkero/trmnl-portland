@@ -48,23 +48,34 @@ def _render_html(context: dict[str, Any]) -> str:
 
 
 async def _screenshot(html_path: Path, out_png: Path) -> None:
-    """Screenshot the HTML file at 800x480 using Playwright."""
+    """
+    Screenshot at 2× resolution (1600×960) for supersampling, then scale down
+    to 800×480 before 1-bit conversion — produces much sharper text on e-ink.
+    """
     from playwright.async_api import async_playwright
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page(viewport={"width": 800, "height": 480})
+        page = await browser.new_page(
+            viewport={"width": 800, "height": 480},
+            device_scale_factor=2,
+        )
         await page.goto(f"file://{html_path.resolve()}", wait_until="load")
         await page.screenshot(path=str(out_png), clip={"x": 0, "y": 0, "width": 800, "height": 480})
         await browser.close()
 
 
 def _convert_to_1bit(src: Path, dst: Path) -> None:
-    """Convert to 1-bit monochrome PNG using ImageMagick."""
+    """
+    Scale the 2× screenshot down to 800×480 (anti-alias downsampling sharpens
+    text edges), then convert to 1-bit monochrome.
+    """
     result = subprocess.run(
         [
             "magick",
             str(src),
+            "-resize", "800x480",
+            "-threshold", "50%",
             "-monochrome",
             "-colors", "2",
             "-depth", "1",
