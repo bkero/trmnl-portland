@@ -76,8 +76,13 @@ async def _screenshot(html_path: Path, out_png: Path) -> None:
 
 def _imagemagick_cmd() -> str:
     """Return 'magick' (IM7+) if available, else fall back to 'convert' (IM6)."""
-    result = subprocess.run(["magick", "--version"], capture_output=True)
-    return "magick" if result.returncode == 0 else "convert"
+    try:
+        result = subprocess.run(["magick", "--version"], capture_output=True)
+        if result.returncode == 0:
+            return "magick"
+    except FileNotFoundError:
+        pass
+    return "convert"
 
 
 def _convert_to_1bit(src: Path, dst: Path) -> None:
