@@ -18,7 +18,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from render import build_template_context, render_to_png
-from scrapers import CityCastScraper, FunhouseScraper, HollywoodScraper
+from scrapers import CityCastScraper, FunhouseScraper, HollywoodScraper, MercuryScraper
 from scrapers.base import BaseScraper, Event
 
 load_dotenv()
@@ -29,6 +29,7 @@ SCRAPER_CLASSES: list[type[BaseScraper]] = [
     FunhouseScraper,
     HollywoodScraper,
     CityCastScraper,
+    MercuryScraper,
 ]
 
 # Maximum events to show per source (display space is limited)
