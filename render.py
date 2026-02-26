@@ -61,6 +61,15 @@ async def _screenshot(html_path: Path, out_png: Path) -> None:
             device_scale_factor=2,
         )
         await page.goto(f"file://{html_path.resolve()}", wait_until="load")
+        # If a column overflows its height, hide the time/location meta lines so
+        # more event titles fit within the fixed 480px display.
+        await page.evaluate("""
+            document.querySelectorAll('.source-col').forEach(col => {
+                if (col.scrollHeight > col.clientHeight) {
+                    col.querySelectorAll('.event-meta').forEach(m => m.style.display = 'none');
+                }
+            });
+        """)
         await page.screenshot(path=str(out_png), clip={"x": 0, "y": 0, "width": 800, "height": 480})
         await browser.close()
 
