@@ -37,6 +37,32 @@ SCRAPER_CLASSES: list[type[BaseScraper]] = [
 MAX_EVENTS_PER_SOURCE = 8
 
 
+def _pack_columns(sources: list[dict], height_limit: int = 7) -> list[list[dict]]:
+    """
+    First-fit bin-packing: stack sources into shared columns when their
+    combined event count fits within height_limit. Sources stay in their
+    original order; smaller sources flow into existing columns before a
+    new column is opened.
+    """
+    columns: list[list[dict]] = []
+    col_heights: list[int] = []
+
+    for source in sources:
+        h = len(source["events"])
+        placed = False
+        for i, col in enumerate(columns):
+            if col_heights[i] + h <= height_limit:
+                col.append(source)
+                col_heights[i] += h
+                placed = True
+                break
+        if not placed:
+            columns.append([source])
+            col_heights.append(h)
+
+    return columns
+
+
 async def run(target_date: date, render_only: bool = False) -> Path:
     # Run all scrapers concurrently
     scrapers = [cls(target_date=target_date) for cls in SCRAPER_CLASSES]
@@ -73,7 +99,8 @@ async def run(target_date: date, render_only: bool = False) -> Path:
             )
         print(f"[INFO] {scraper.SOURCE_LABEL}: {len(capped)} event(s)")
 
-    context = build_template_context(grouped, target_date)
+    columns = _pack_columns(grouped)
+    context = build_template_context(columns, target_date)
     output_path = await render_to_png(context)
     print(f"[INFO] Rendered → {output_path}")
 

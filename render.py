@@ -103,5 +103,5 @@ def build_template_context(grouped_events: list[dict], target_date) -> dict[str,
     return {
         "date_label": target_date.strftime("%A, %B %-d"),
         "updated_at": datetime.now().strftime("%-I:%M %p"),
-        "sources": grouped_events,
+        "columns": grouped_events,
     }

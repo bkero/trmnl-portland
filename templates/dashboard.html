@@ -70,6 +70,12 @@
       margin-bottom: 7px;
     }
 
+    /* ── Source divider (between stacked sources in one column) ─── */
+    .source-divider {
+      border-top: 1.5px solid black;
+      margin: 6px 0 5px;
+    }
+
     /* ── Event item ──────────────────────────────────────────────── */
     .event {
       margin-bottom: 9px;
@@ -113,8 +119,10 @@
   </div>
 
   <div class="body">
-    {% for source in sources %}
+    {% for column in columns %}
     <div class="source-col">
+      {% for source in column %}
+      {% if not loop.first %}<div class="source-divider"></div>{% endif %}
       <div class="source-label">{{ source.label }}</div>
 
       {% for ev in source.events %}
@@ -128,6 +136,7 @@
         </div>
         {% endif %}
       </div>
+      {% endfor %}
       {% endfor %}
     </div>
     {% endfor %}
