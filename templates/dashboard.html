@@ -95,13 +95,6 @@
       font-weight: 700;
     }
 
-    /* ── Empty state ─────────────────────────────────────────────── */
-    .no-events {
-      font-size: 14px;
-      font-weight: 400;
-      margin-top: 4px;
-    }
-
     /* ── Footer ─────────────────────────────────────────────────── */
     .footer {
       position: absolute;
@@ -124,22 +117,18 @@
     <div class="source-col">
       <div class="source-label">{{ source.label }}</div>
 
-      {% if source.events %}
-        {% for ev in source.events %}
-        <div class="event">
-          <div class="event-title">{{ ev.title }}</div>
-          {% if ev.time or ev.location %}
-          <div class="event-meta">
-            {% if ev.time %}<span class="event-time">{{ ev.time }}</span>{% endif %}
-            {% if ev.time and ev.location %} · {% endif %}
-            {% if ev.location %}{{ ev.location }}{% endif %}
-          </div>
-          {% endif %}
+      {% for ev in source.events %}
+      <div class="event">
+        <div class="event-title">{{ ev.title }}</div>
+        {% if ev.time or ev.location %}
+        <div class="event-meta">
+          {% if ev.time %}<span class="event-time">{{ ev.time }}</span>{% endif %}
+          {% if ev.time and ev.location %} · {% endif %}
+          {% if ev.location %}{{ ev.location }}{% endif %}
         </div>
-        {% endfor %}
-      {% else %}
-        <div class="no-events">No events today</div>
-      {% endif %}
+        {% endif %}
+      </div>
+      {% endfor %}
     </div>
     {% endfor %}
   </div>

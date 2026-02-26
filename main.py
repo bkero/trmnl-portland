@@ -53,22 +53,23 @@ async def run(target_date: date, render_only: bool = False) -> Path:
         sorted_events = sorted(events, key=lambda e: (e.sort_key == "", e.sort_key))
         capped = sorted_events[:MAX_EVENTS_PER_SOURCE]
 
-        grouped.append(
-            {
-                "label": scraper.SOURCE_LABEL,
-                "source": scraper.SOURCE_ID,
-                "events": [
-                    {
-                        "title": ev.title,
-                        "time": ev.time,
-                        "location": ev.location,
-                        "description": ev.description,
-                        "url": ev.url,
-                    }
-                    for ev in capped
-                ],
-            }
-        )
+        if capped:
+            grouped.append(
+                {
+                    "label": scraper.SOURCE_LABEL,
+                    "source": scraper.SOURCE_ID,
+                    "events": [
+                        {
+                            "title": ev.title,
+                            "time": ev.time,
+                            "location": ev.location,
+                            "description": ev.description,
+                            "url": ev.url,
+                        }
+                        for ev in capped
+                    ],
+                }
+            )
         print(f"[INFO] {scraper.SOURCE_LABEL}: {len(capped)} event(s)")
 
     context = build_template_context(grouped, target_date)
