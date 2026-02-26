@@ -45,7 +45,13 @@ class BaseScraper(ABC):
     SOURCE_LABEL: str = ""    # human-readable name shown on display
 
     def __init__(self, target_date: Optional[date] = None) -> None:
-        self.target_date = target_date or date.today()
+        if target_date is None:
+            # All sources are Portland, OR venues — use Pacific time so that
+            # "today" matches the local date even when the server runs in UTC.
+            import zoneinfo
+            from datetime import datetime as _dt
+            target_date = _dt.now(zoneinfo.ZoneInfo("America/Los_Angeles")).date()
+        self.target_date = target_date
 
     @abstractmethod
     async def fetch(self) -> list[Event]:
