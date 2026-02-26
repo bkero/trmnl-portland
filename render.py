@@ -74,14 +74,21 @@ async def _screenshot(html_path: Path, out_png: Path) -> None:
         await browser.close()
 
 
+def _imagemagick_cmd() -> str:
+    """Return 'magick' (IM7+) if available, else fall back to 'convert' (IM6)."""
+    result = subprocess.run(["magick", "--version"], capture_output=True)
+    return "magick" if result.returncode == 0 else "convert"
+
+
 def _convert_to_1bit(src: Path, dst: Path) -> None:
     """
     Scale the 2× screenshot down to 800×480 (anti-alias downsampling sharpens
     text edges), then convert to 1-bit monochrome.
     """
+    cmd = _imagemagick_cmd()
     result = subprocess.run(
         [
-            "magick",
+            cmd,
             str(src),
             "-resize", "800x480",
             "-threshold", "50%",
