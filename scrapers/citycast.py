@@ -58,12 +58,24 @@ class CityCastScraper(BaseScraper):
             return None
 
         soup = BeautifulSoup(resp.text, "lxml")
+        import re as _re
+        newsletter_links = []
         for a in soup.find_all("a", href=True):
             href = a["href"]
-            if date_str in href and "newsletter" in href:
-                if href.startswith("http"):
-                    return href
-                return f"{NEWSLETTER_BASE}{href}"
+            if "newsletter" in href and _re.search(r"\d{4}-\d{2}-\d{2}", href):
+                newsletter_links.append(href)
+
+        # Prefer today's newsletter; fall back to the most recent one.
+        # City Cast publishes Mon–Fri; the Friday issue covers the coming weekend,
+        # so the most recent newsletter will contain events for Saturday/Sunday.
+        for href in newsletter_links:
+            if date_str in href:
+                return href if href.startswith("http") else f"{NEWSLETTER_BASE}{href}"
+
+        if newsletter_links:
+            href = newsletter_links[0]
+            return href if href.startswith("http") else f"{NEWSLETTER_BASE}{href}"
+
         return None
 
     # ------------------------------------------------------------------
@@ -152,10 +164,19 @@ class CityCastScraper(BaseScraper):
 
     @staticmethod
     def _date_label(d: date) -> str:
-        """Return a label like 'Wednesday, Feb. 25' matching the newsletter format."""
-        # Newsletter uses abbreviated month with period: "Feb. 25", "Mar. 1", etc.
-        month_abbr = d.strftime("%b") + "."
-        return f"{d.strftime('%A')}, {month_abbr} {d.day}"
+        """Return a label like 'Wednesday, Feb. 25' matching the newsletter format.
+
+        City Cast follows AP style: months with 5 or fewer letters (March, April,
+        May, June, July) are spelled out in full; others are abbreviated with a
+        trailing period (Jan., Feb., Aug., Sept., Oct., Nov., Dec.).
+        """
+        AP_ABBREVS = {
+            1: "Jan.", 2: "Feb.", 3: "March", 4: "April", 5: "May",
+            6: "June", 7: "July", 8: "Aug.", 9: "Sept.",
+            10: "Oct.", 11: "Nov.", 12: "Dec.",
+        }
+        month_str = AP_ABBREVS[d.month]
+        return f"{d.strftime('%A')}, {month_str} {d.day}"
 
     @staticmethod
     def _element_position(soup: BeautifulSoup, el) -> int:
