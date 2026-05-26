@@ -63,8 +63,11 @@ class MercuryScraper(BaseScraper):
     def _find_current_article(self) -> Optional[str]:
         try:
             resp = requests.get(INDEX_URL, headers=HEADERS, timeout=15)
-            resp.raise_for_status()
-        except Exception:
+            if not resp.ok:
+                print(f"[WARN] Portland Mercury index returned HTTP {resp.status_code}")
+                return None
+        except Exception as exc:
+            print(f"[WARN] Portland Mercury index fetch failed: {exc}")
             return None
 
         soup = BeautifulSoup(resp.text, "lxml")
