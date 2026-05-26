@@ -17,6 +17,7 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
+STATIC_DIR = Path(__file__).parent / "static"
 OUTPUT_DIR = Path(__file__).parent / "output"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -116,4 +117,5 @@ def build_template_context(grouped_events: list[dict], target_date) -> dict[str,
         "date_label": target_date.strftime("%A, %B %-d"),
         "updated_at": datetime.now().strftime("%-I:%M %p"),
         "columns": grouped_events,
+        "static_dir": STATIC_DIR.resolve().as_uri(),
     }

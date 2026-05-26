@@ -2,23 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- Inter: TRMNL's framework font, tuned for e-ink at weights 300–700 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=block">
   <style>
+    @font-face {
+      font-family: "TRMNL12";
+      font-weight: normal;
+      src: url({{ static_dir }}/fonts/TRMNL12-Regular.woff2) format("woff2");
+    }
+    @font-face {
+      font-family: "TRMNL12";
+      font-weight: bold;
+      src: url({{ static_dir }}/fonts/TRMNL12-Bold.woff2) format("woff2");
+    }
+    @font-face {
+      font-family: "TRMNL16";
+      font-weight: normal;
+      src: url({{ static_dir }}/fonts/TRMNL16-Regular.woff2) format("woff2");
+    }
+    @font-face {
+      font-family: "TRMNL16";
+      font-weight: bold;
+      src: url({{ static_dir }}/fonts/TRMNL16-Bold.woff2) format("woff2");
+    }
+    @font-face {
+      font-family: "TRMNL21";
+      font-weight: normal;
+      src: url({{ static_dir }}/fonts/TRMNL21-Regular.woff2) format("woff2");
+    }
+    @font-face {
+      font-family: "TRMNL21";
+      font-weight: bold;
+      src: url({{ static_dir }}/fonts/TRMNL21-Bold.woff2) format("woff2");
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      /* Prevent subpixel/colour anti-aliasing — grayscale is safest for 1-bit */
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: none;
+      font-smooth: never;
     }
 
     body {
       width: 800px;
       height: 480px;
-      font-family: 'Inter', Arial, Helvetica, sans-serif;
       background: white;
       color: black;
       overflow: hidden;
@@ -33,14 +59,15 @@
       border-bottom: 3px solid black;
     }
     .header-title {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: -0.5px;
+      font-family: "TRMNL21", monospace;
+      font-size: 21px;
+      font-weight: bold;
       text-transform: uppercase;
     }
     .header-date {
-      font-size: 15px;
-      font-weight: 700;
+      font-family: "TRMNL16", monospace;
+      font-size: 16px;
+      font-weight: normal;
     }
 
     /* ── Body layout ─────────────────────────────────────────────── */
@@ -61,13 +88,13 @@
     }
 
     .source-label {
-      font-size: 13px;
-      font-weight: 900;
+      font-family: "TRMNL16", monospace;
+      font-size: 16px;
+      font-weight: bold;
       text-transform: uppercase;
-      letter-spacing: 1px;
       border-bottom: 1.5px solid black;
       padding-bottom: 4px;
-      margin-bottom: 7px;
+      margin-bottom: 6px;
     }
 
     /* ── Source divider (between stacked sources in one column) ─── */
@@ -78,27 +105,29 @@
 
     /* ── Event item ──────────────────────────────────────────────── */
     .event {
-      margin-bottom: 9px;
+      margin-bottom: 8px;
       line-height: 1.2;
     }
     .event-title {
-      font-size: 15px;
-      font-weight: 700;
+      font-family: "TRMNL16", monospace;
+      font-size: 16px;
+      font-weight: bold;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
     .event-meta {
-      font-size: 13px;
-      font-weight: 400;
+      font-family: "TRMNL12", monospace;
+      font-size: 12px;
+      font-weight: normal;
       margin-top: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .event-time {
-      font-weight: 700;
+      font-weight: bold;
     }
 
     /* ── Footer ─────────────────────────────────────────────────── */
@@ -106,8 +135,9 @@
       position: absolute;
       bottom: 5px;
       right: 10px;
+      font-family: "TRMNL12", monospace;
       font-size: 12px;
-      font-weight: 400;
+      font-weight: normal;
     }
   </style>
 </head>
