@@ -98,19 +98,20 @@ class CityCastScraper(BaseScraper):
         """
         today_label = self._date_label(self.target_date)
 
-        # Find all h2s to locate today's section and the next day boundary
-        all_h2s = soup.find_all("h2")
+        # Find all h3s to locate today's section and the next day boundary
+        # (City Cast switched from h2 to h3 for day headings)
+        all_h3s = soup.find_all("h3")
         today_h2 = None
         next_day_h2 = None
 
-        for i, h2 in enumerate(all_h2s):
-            text = h2.get_text(strip=True)
+        for i, h3 in enumerate(all_h3s):
+            text = h3.get_text(strip=True)
             if today_label in text:
-                today_h2 = h2
-                # Next day heading is the next h2 that looks like a date
-                for j in range(i + 1, len(all_h2s)):
-                    if re.search(r"\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*,", all_h2s[j].get_text()):
-                        next_day_h2 = all_h2s[j]
+                today_h2 = h3
+                # Next day heading is the next h3 that looks like a date
+                for j in range(i + 1, len(all_h3s)):
+                    if re.search(r"\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*,", all_h3s[j].get_text()):
+                        next_day_h2 = all_h3s[j]
                         break
                 break
 

@@ -26,7 +26,7 @@ from bs4 import BeautifulSoup, Tag
 
 from .base import BaseScraper, Event
 
-INDEX_URL = "https://www.portlandmercury.com/collections/47901508/do-this-do-that"
+INDEX_URL = "https://www.portlandmercury.com/category/do-this-do-that/"
 BASE_URL = "https://www.portlandmercury.com"
 HEADERS = {
     "User-Agent": (
@@ -37,7 +37,8 @@ HEADERS = {
 
 # Matches "Monday, February 23", "Sunday, March 1", etc.
 DAY_HEADING_RE = re.compile(
-    r"^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+\w+\s+\d+$"
+    r"^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+\w+\s+\d+$",
+    re.IGNORECASE,
 )
 
 # Looks for "at Venue Name", "at the Venue", or "Venue, Address"
@@ -67,7 +68,7 @@ class MercuryScraper(BaseScraper):
             return None
 
         soup = BeautifulSoup(resp.text, "lxml")
-        pattern = re.compile(r"/do-this-do-that/\d{4}/\d{2}/\d{2}/")
+        pattern = re.compile(r"/do-this-do-that/[a-z0-9][a-z0-9-]+/")
         seen = set()
         for a in soup.find_all("a", href=pattern):
             href = a["href"]
@@ -91,10 +92,11 @@ class MercuryScraper(BaseScraper):
         soup = BeautifulSoup(resp.text, "lxml")
         today_label = self.target_date.strftime("%A, %B %-d")
 
-        # Find the unclassed <h2> that matches today's date label
+        # Find the <h2> that matches today's date label (case-insensitive)
         target_h2 = None
+        today_label_upper = today_label.upper()
         for h2 in soup.find_all("h2"):
-            if not h2.get("class") and today_label in h2.get_text(strip=True):
+            if today_label_upper in h2.get_text(strip=True).upper():
                 target_h2 = h2
                 break
 
@@ -109,7 +111,7 @@ class MercuryScraper(BaseScraper):
         current = day_h2.find_next_sibling()
 
         while current:
-            if current.name == "h2" and not current.get("class"):
+            if current.name == "h2":
                 title = current.get_text(strip=True)
                 if not title:
                     current = current.find_next_sibling()

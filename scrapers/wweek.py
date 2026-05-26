@@ -1,17 +1,21 @@
 """
 Willamette Week calendar scraper.
 
-API: https://www.wweek.com/calendar/willamette/search.json
-     ?page=1&ongoing=true&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
-
-Each event has:
-  _source.name        — event title
-  _source.starttime   — ISO datetime with tz offset (e.g. "2026-02-25T17:00:00.000-08:00")
-  _source.venue.name  — venue name
+WWeek's calendar is now powered by CitySpark. The portal JS at
+  https://portal.cityspark.com/PortalScripts/WillametteWeek
+embeds all of today's events in a `cSparkLocals` JS variable with
+an `Events` array. Each event has:
+  Name        — title
+  Venue       — venue name
+  StartUTC    — ISO UTC datetime (e.g. "2026-05-26T15:30:00Z")
+  AllDay      — bool
+  HasTime     — bool
 """
 from __future__ import annotations
 
 import asyncio
+import json
+import re
 from datetime import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -20,7 +24,7 @@ import requests
 
 from .base import BaseScraper, Event
 
-API_URL = "https://www.wweek.com/calendar/willamette/search.json"
+CITYSPARK_URL = "https://portal.cityspark.com/PortalScripts/WillametteWeek"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 
 
@@ -32,46 +36,69 @@ class WWeekScraper(BaseScraper):
         return await asyncio.to_thread(self._fetch_sync)
 
     def _fetch_sync(self) -> list[Event]:
-        date_str = self.target_date.strftime("%Y-%m-%d")
         try:
-            resp = requests.get(
-                API_URL,
-                params={"page": 1, "ongoing": "true", "start_date": date_str, "end_date": date_str},
-                timeout=15,
-            )
+            resp = requests.get(CITYSPARK_URL, timeout=15)
             resp.raise_for_status()
         except Exception:
             return []
 
+        data = self._extract_json(resp.text)
+        if data is None:
+            return []
+
         results = []
-        for ev_wrapper in resp.json().get("events", []):
-            ev = ev_wrapper.get("_source", {})
+        for ev in data.get("Events", []):
             event = self._parse_event(ev)
             if event:
                 results.append(event)
 
         return results
 
-    def _parse_event(self, ev: dict) -> Optional[Event]:
-        starttime = ev.get("starttime")
-        if not starttime:
+    @staticmethod
+    def _extract_json(text: str) -> Optional[dict]:
+        """Pull the cSparkLocals {...} object out of the JS file."""
+        idx = text.find("cSparkLocals")
+        if idx < 0:
+            return None
+        try:
+            start = text.index("{", idx)
+        except ValueError:
             return None
 
-        dt = datetime.fromisoformat(starttime).astimezone(PACIFIC)
+        depth = 0
+        for i in range(start, len(text)):
+            if text[i] == "{":
+                depth += 1
+            elif text[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    try:
+                        return json.loads(text[start : i + 1])
+                    except json.JSONDecodeError:
+                        return None
+        return None
+
+    def _parse_event(self, ev: dict) -> Optional[Event]:
+        start_utc = ev.get("StartUTC")
+        if not start_utc:
+            return None
+
+        dt = datetime.fromisoformat(start_utc.replace("Z", "+00:00")).astimezone(PACIFIC)
         if dt.date() != self.target_date:
             return None
 
-        name = (ev.get("name") or "").strip()
+        name = (ev.get("Name") or "").strip()
         if not name:
             return None
 
-        time_str = None if ev.get("allday") else dt.strftime("%-I:%M %p")
+        time_str = None
+        if ev.get("HasTime") and not ev.get("AllDay"):
+            time_str = dt.strftime("%-I:%M %p")
 
-        venue = ev.get("venue") or {}
-        location = (venue.get("name") or "").strip() or None
+        venue = (ev.get("Venue") or "").strip() or None
 
         return self._make_event(
             title=name,
             time=time_str,
-            location=location,
+            location=venue,
         )
