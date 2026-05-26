@@ -35,7 +35,7 @@ async def render_to_png(context: dict[str, Any], output_path: Path | None = None
 
     try:
         await _screenshot(tmp_html, raw_path)
-        _convert_to_1bit(raw_path, output_path)
+        _convert_to_2bit(raw_path, output_path)
     finally:
         tmp_html.unlink(missing_ok=True)
 
@@ -50,8 +50,8 @@ def _render_html(context: dict[str, Any]) -> str:
 
 async def _screenshot(html_path: Path, out_png: Path) -> None:
     """
-    Screenshot at 2× resolution (1600×960) for supersampling, then scale down
-    to 800×480 before 1-bit conversion — produces much sharper text on e-ink.
+    Screenshot at 1× (800×480) — pixel fonts must render at their native size;
+    supersampling destroys bitmap glyphs.
     """
     from playwright.async_api import async_playwright
 
@@ -59,7 +59,7 @@ async def _screenshot(html_path: Path, out_png: Path) -> None:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page(
             viewport={"width": 800, "height": 480},
-            device_scale_factor=2,
+            device_scale_factor=1,
         )
         await page.goto(f"file://{html_path.resolve()}", wait_until="load")
         # If a column overflows its height, hide the time/location meta lines so
@@ -86,21 +86,16 @@ def _imagemagick_cmd() -> str:
     return "convert"
 
 
-def _convert_to_1bit(src: Path, dst: Path) -> None:
-    """
-    Scale the 2× screenshot down to 800×480 (anti-alias downsampling sharpens
-    text edges), then convert to 1-bit monochrome.
-    """
+def _convert_to_2bit(src: Path, dst: Path) -> None:
+    """Convert to 2-bit (4-gray) PNG matching the TRMNL display's color depth."""
     cmd = _imagemagick_cmd()
     result = subprocess.run(
         [
             cmd,
             str(src),
-            "-resize", "800x480",
-            "-threshold", "50%",
-            "-monochrome",
-            "-colors", "2",
-            "-depth", "1",
+            "-colorspace", "Gray",
+            "-posterize", "4",
+            "-depth", "2",
             "-strip",
             f"png:{dst}",
         ],
